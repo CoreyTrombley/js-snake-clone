@@ -147,7 +147,7 @@ const draw = (timestamp) => {
     }
 
     // Collisions === end game
-    if (newHead.x < 0 || newHead.x >= SIZE || newHead.y < 0 || newHead.y >= SIZE) {
+    if (currentHead < 0 || currentHead >= SIZE || currentHead < 0 || currentHead >= SIZE) {
        end = true;
     }
 
