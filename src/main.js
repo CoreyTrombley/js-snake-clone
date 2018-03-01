@@ -1,3 +1,5 @@
+import * as renders from './renders';
+
 // animation fps setup
 let startTime;
 let fps = 10;
@@ -5,7 +7,6 @@ let now;
 let then = Date.now();
 let interval = 1000 / fps;
 let delta;
-
 
 // Score Level Setup
 let score = 0;
@@ -23,11 +24,14 @@ const ctx = board.getContext('2d');
 ctx.scale(2, 2);
 
 // setup snake
-let direction = newDirection = 1;
+let newDirection = 1
+let direction = 1;
 let snakeLength = 5;
 let snake = [{x: SIZE / 2, y: SIZE / 2}];
 let food = null;
 let end = false;
+let paused = false;
+let started = false;
 
 // helper functions
 const randomOffset = () => {
@@ -37,21 +41,6 @@ const randomOffset = () => {
 const stringCoords = (obj) => {
   return `${obj.x},${obj.y}`;
 }
-
-const drawScore = () => {
-    ctx.font = "16px Arial";
-    ctx.fillStyle = "#444";
-    ctx.textAlign = 'center';
-    ctx.fillText(`Score: ${score}`, 40, 20);
-}
-
-const drawLevel = () => {
-    ctx.font = "16px Arial";
-    ctx.fillStyle = "#444";
-    ctx.textAlign = 'center';
-    ctx.fillText(`Level: ${level}`, 38, 40);
-}
-
 
 // checks
 const did_eat_food = (food, snake) => {
@@ -69,12 +58,33 @@ const did_eat_food = (food, snake) => {
 }
 
 window.onkeydown = (e) => {
+  // pause
+  if (e.keyCode === 80) {
+    if (paused === true) {
+      paused = false;
+      window.requestAnimationFrame(draw);
+      return;
+    } else {
+      paused = true;
+      renders.drawPause(ctx);
+      return;
+    }
+  }
+
+  // reset
   if (e.keyCode === 13 && end === true) {
-    console.log('pressed')
     e.preventDefault();
     document.location.reload(true);
     return;
   }
+
+  if (e.keyCode === 13 && started !== true) {
+    started = true;
+    window.requestAnimationFrame(draw);
+    return;
+  }
+
+  // movement
   newDirection = {37: -1, 38: -2, 39: 1, 40: 2}[e.keyCode] || newDirection;
 };
 
@@ -82,25 +92,35 @@ const draw = (timestamp) => {
 
   timestamp = timestamp || new Date().getTime();
 
-
-  if (end !== true) {
-    window.requestAnimationFrame(timestamp => draw(timestamp))
-  } else {
-    ctx.fillStyle = '#444';
-    ctx.font = '40px arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Press enter to restart', SIZE / 2, SIZE / 2);
+  // check if the game is paused
+  if (paused === true) {
+    renders.drawPause(ctx);
+    return;
   }
+
+  // check if the game has started
+  if (started !== true) {
+    renders.drawBoard(ctx);
+    renders.drawStart(ctx);
+    return;
+  }
+
+  // check if the game has ended
+  if (end === true) {
+    renders.drawEnd(ctx);
+    return;
+  }
+
+  window.requestAnimationFrame(timestamp => draw(timestamp))
 
   now = Date.now();
   delta = now - then;
 
-  drawScore();
-  drawLevel();
+  // manage fps / difficulty
   if (delta > interval) {
     then = now - (delta % interval);
 
-    const newHead = {x: snake[0].x, y: snake[0].y};
+    const currentHead = {x: snake[0].x, y: snake[0].y};
 
     if (Math.abs(direction) !== Math.abs(newDirection)) {
       direction = newDirection;
@@ -108,27 +128,25 @@ const draw = (timestamp) => {
 
     const axis = Math.abs(direction) === 1 ? 'x' : 'y';
     if (direction < 0) {
-      newHead[axis] -= GRID;
+      currentHead[axis] -= GRID;
     } else {
-      newHead[axis] += GRID;
+      currentHead[axis] += GRID;
     }
 
-    did_eat_food(food, newHead);
+    did_eat_food(food, currentHead);
 
-    ctx.fillStyle = '#eee' // '#002b36';
-    ctx.fillRect(0, 0, SIZE, SIZE);
+    renders.drawBoard(ctx);
+    renders.drawScore(ctx, score);
+    renders.drawLevel(ctx, level);
 
     if (end) {
-      ctx.fillStyle = '#444';
-      ctx.font = '40px arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('Press enter to start', SIZE / 2, SIZE / 2);
+      renders.drawEnd(ctx);
     } else {
-      snake.unshift(newHead);
+      snake.unshift(currentHead);
       snake = snake.slice(0, snakeLength);
     }
 
-    // Collisions
+    // Collisions === end game
     if (newHead.x < 0 || newHead.x >= SIZE || newHead.y < 0 || newHead.y >= SIZE) {
        end = true;
     }
@@ -143,19 +161,18 @@ const draw = (timestamp) => {
       }
     }
 
-    if (snakeObj[stringCoords(newHead)]) {
+    if (snakeObj[stringCoords(currentHead)]) {
        end = true;
     }
 
+    // make sure we always have food to eat
     while (!food || snakeObj[stringCoords(food)]) {
       food = {x: randomOffset(), y: randomOffset()};
     }
-    ctx.fillStyle = '#e80055';
-    ctx.fillRect(food.x, food.y, GRID, GRID);
 
+    renders.drawFood(ctx, food);
   }
 }
-
 
 window.onload = () => {
   window.requestAnimationFrame(timestamp => {
