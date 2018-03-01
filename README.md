@@ -16,7 +16,7 @@ Simple Snake clone built in javascript. Leveraged some features of javascript to
 Clone the repo
 
 ```
-git clone <INSERT REPO NAME>
+git clone https://github.com/CoreyTrombley/js-snake-clone.git
 ```
 
 Install packages
