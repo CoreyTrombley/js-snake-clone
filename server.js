@@ -1,14 +1,12 @@
-const server = require('express')();
+const express = require('express');
+const server = express();
 const request = require('request');
 const path = require('path');
 
 const host = 'localhost';
 const port = 3000;
 
-server.get('/', (req, res) => {
-  res.sendFile(path.join(`${__dirname}/index.html`));
-})
-
+server.use(express.static(path.join(__dirname, 'dist')));
 server.listen(port, () => {
   console.log(`Server running @ http://${host}:${port}`)
 })
