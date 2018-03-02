@@ -1,6 +1,8 @@
 # Simple Snake
 Simple Snake clone built in javascript. Leveraged some features of javascript to add a level of difficulty.
 
+![snake game screen shot](snake_ss.png)
+
 ## Additional Features
 
 - Score tracking

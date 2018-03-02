@@ -83,7 +83,7 @@ let delta;
 // Score Level Setup
 let score = 0;
 let level = 1;
-
+let speed = 0;
 // board set up
 const SIZE = 500;
 const GRID = SIZE / 50;
@@ -125,8 +125,9 @@ const did_eat_food = (food, snake) => {
     snakeLength += 5;
 
     if (score % 2 === 0) {
-      level += 3;
-      fps = fps < 60 ? 10 + level : 60;
+      level += 1;
+      speed = level + 2;
+      fps = fps < 60 ? 10 + speed : 60;
       interval = 1000 / fps;
     }
   }
