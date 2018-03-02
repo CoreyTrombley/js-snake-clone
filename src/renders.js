@@ -14,7 +14,7 @@ export const drawScore = (ctx, score) => {
 }
 
 export const drawFood = (ctx, food) => {
-  ctx.fillStyle = '#e80055';
+  ctx.fillStyle = '#ff005e';
   ctx.fillRect(food.x, food.y, GRID, GRID);
 }
 

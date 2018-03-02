@@ -16,6 +16,8 @@ let level = 1;
 const SIZE = 500;
 const GRID = SIZE / 50;
 
+const eatFood = new Audio('./eat.mp3'); // buffers automatically when created
+
 const board = document.getElementById('board');
 board.height = board.width = SIZE * 2;
 board.style.width = board.style.height = SIZE + 'px';
@@ -45,12 +47,13 @@ const stringCoords = (obj) => {
 // checks
 const did_eat_food = (food, snake) => {
   if (food && food.x === snake.x && food.y === snake.y) {
+    eatFood.play();
     food = null;
     score += 1;
     snakeLength += 5;
 
     if (score % 2 === 0) {
-      level += 1;
+      level += 3;
       fps = fps < 60 ? 10 + level : 60;
       interval = 1000 / fps;
     }
@@ -147,7 +150,7 @@ const draw = (timestamp) => {
     }
 
     // Collisions === end game
-    if (currentHead < 0 || currentHead >= SIZE || currentHead < 0 || currentHead >= SIZE) {
+    if (currentHead.x < 0 || currentHead.x >= SIZE || currentHead.y < 0 || currentHead.y >= SIZE) {
        end = true;
     }
 

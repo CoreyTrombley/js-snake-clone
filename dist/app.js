@@ -88,6 +88,8 @@ let level = 1;
 const SIZE = 500;
 const GRID = SIZE / 50;
 
+const eatFood = new Audio('./eat.mp3'); // buffers automatically when created
+
 const board = document.getElementById('board');
 board.height = board.width = SIZE * 2;
 board.style.width = board.style.height = SIZE + 'px';
@@ -117,12 +119,13 @@ const stringCoords = obj => {
 // checks
 const did_eat_food = (food, snake) => {
   if (food && food.x === snake.x && food.y === snake.y) {
+    eatFood.play();
     food = null;
     score += 1;
     snakeLength += 5;
 
     if (score % 2 === 0) {
-      level += 1;
+      level += 3;
       fps = fps < 60 ? 10 + level : 60;
       interval = 1000 / fps;
     }
@@ -164,17 +167,20 @@ const draw = timestamp => {
 
   timestamp = timestamp || new Date().getTime();
 
+  // check if the game is paused
   if (paused === true) {
     __WEBPACK_IMPORTED_MODULE_0__renders__["e" /* drawPause */](ctx);
     return;
   }
 
+  // check if the game has started
   if (started !== true) {
     __WEBPACK_IMPORTED_MODULE_0__renders__["a" /* drawBoard */](ctx);
     __WEBPACK_IMPORTED_MODULE_0__renders__["g" /* drawStart */](ctx);
     return;
   }
 
+  // check if the game has ended
   if (end === true) {
     __WEBPACK_IMPORTED_MODULE_0__renders__["b" /* drawEnd */](ctx);
     return;
@@ -185,10 +191,11 @@ const draw = timestamp => {
   now = Date.now();
   delta = now - then;
 
+  // manage fps / difficulty
   if (delta > interval) {
     then = now - delta % interval;
 
-    const newHead = { x: snake[0].x, y: snake[0].y };
+    const currentHead = { x: snake[0].x, y: snake[0].y };
 
     if (Math.abs(direction) !== Math.abs(newDirection)) {
       direction = newDirection;
@@ -196,12 +203,12 @@ const draw = timestamp => {
 
     const axis = Math.abs(direction) === 1 ? 'x' : 'y';
     if (direction < 0) {
-      newHead[axis] -= GRID;
+      currentHead[axis] -= GRID;
     } else {
-      newHead[axis] += GRID;
+      currentHead[axis] += GRID;
     }
 
-    did_eat_food(food, newHead);
+    did_eat_food(food, currentHead);
 
     __WEBPACK_IMPORTED_MODULE_0__renders__["a" /* drawBoard */](ctx);
     __WEBPACK_IMPORTED_MODULE_0__renders__["f" /* drawScore */](ctx, score);
@@ -210,12 +217,12 @@ const draw = timestamp => {
     if (end) {
       __WEBPACK_IMPORTED_MODULE_0__renders__["b" /* drawEnd */](ctx);
     } else {
-      snake.unshift(newHead);
+      snake.unshift(currentHead);
       snake = snake.slice(0, snakeLength);
     }
 
-    // Collisions
-    if (newHead.x < 0 || newHead.x >= SIZE || newHead.y < 0 || newHead.y >= SIZE) {
+    // Collisions === end game
+    if (currentHead.x < 0 || currentHead.x >= SIZE || currentHead.y < 0 || currentHead.y >= SIZE) {
       end = true;
     }
 
@@ -229,10 +236,11 @@ const draw = timestamp => {
       }
     }
 
-    if (snakeObj[stringCoords(newHead)]) {
+    if (snakeObj[stringCoords(currentHead)]) {
       end = true;
     }
 
+    // make sure we always have food to eat
     while (!food || snakeObj[stringCoords(food)]) {
       food = { x: randomOffset(), y: randomOffset() };
     }
@@ -273,7 +281,7 @@ const drawScore = (ctx, score) => {
 
 
 const drawFood = (ctx, food) => {
-  ctx.fillStyle = '#e80055';
+  ctx.fillStyle = '#ff005e';
   ctx.fillRect(food.x, food.y, GRID, GRID);
 };
 /* harmony export (immutable) */ __webpack_exports__["c"] = drawFood;

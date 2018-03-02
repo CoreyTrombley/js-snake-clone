@@ -1,1 +1,19 @@
-body{padding-top:5px;}.jumbotron{font:arial;background-color:#444;color:#fff}
+body {
+  padding-top:5px;
+}
+
+.jumbotron {
+  font: arial;
+  background-color: #444;
+  color: #fff;
+}
+
+.jumbotron h1 {
+  color: #b6da34;
+}
+
+.jumbotron p {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
